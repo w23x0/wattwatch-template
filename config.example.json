@@ -1,0 +1,15 @@
+{
+  "api_base": "https://api.etslink.net/api",
+  "appid": "wx3dbe6fbd8349b19b",
+  "item_ids": [],
+  "areas": [],
+  "area": "示例校区1-4公寓",
+  "request_interval": 0.5,
+  "max_consecutive_errors": 10,
+  "worker_url": "https://power.example.com",
+  "token_file": "~/.config/wattwatch/token",
+  "refresh_file": "~/.config/wattwatch/refresh.json",
+  "auto_refresh_token": true,
+  "poller_token_file": "~/.config/wattwatch/poller_token",
+  "data_dir": "~/.local/share/wattwatch"
+}

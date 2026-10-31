@@ -1,0 +1,64 @@
+# WattWatch WattWatch · Cloudflare Worker（看板 + API + 预警）
+# 首次部署见 README「部署」一节。只用到免费额度内的产品：Workers / Static Assets / D1 / Cron / Turnstile。
+name = "wattwatch"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+# 可选：挂自建域名（*.workers.dev 在部分校园网/运营商下不可达）
+# routes = [{ pattern = "power.example.com", custom_domain = true }]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "wattwatch"
+database_id = "<运行 `npx wrangler d1 create wattwatch` 后填入>"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["*/30 * * * *"]
+
+[observability]
+enabled = true
+
+[vars]
+SITE_NAME = "WattWatch"
+SITE_URL = "https://power.example.com"
+# 管理员邮箱（逗号分隔）：接收轮询器故障通知，可在网页里看运行状态
+ADMIN_EMAILS = ""
+# 预警：预计「最早停电」不足 THRESHOLD_HOURS 小时发预警；不足 URGENT_HOURS 小时发临停提醒；余量低于 LOW_KWH 度直接预警
+THRESHOLD_HOURS = "24"
+URGENT_HOURS = "6"
+LOW_KWH = "3"
+# 余量到多少度会停电（部分宿舍允许少量透支，可填负数）
+CUTOFF_KWH = "0"
+# 学校后台刷新读数的延迟（分钟）：读数时刻减去它再向下取整到整点，即这条读数代表的计量小时
+METER_LAG_MIN = "10"
+# 法定节假日（按休息日算）与调休上班日，逗号分隔 YYYY-MM-DD
+HOLIDAYS = ""
+WORKDAYS = ""
+# 电价（元/度），用于把充值/用电折算成钱：一个数，或按购电项 {"1":0.56,"5":0.6,"6":0.6,"7":0.56}。不确定就留空，只显示度数
+PRICE = ""
+# 验证码邮件全站每日上限（保护发信邮箱不被风控）
+OTP_DAILY_CAP = "300"
+# SMTP 发信（默认 QQ 邮箱；SMTP_PASS 用 secret：npx wrangler secret put SMTP_PASS）
+SMTP_HOST = "smtp.qq.com"
+SMTP_PORT = "465"
+SMTP_SECURE = "tls"
+# ⚠️ 必填：发信 QQ 邮箱。SMTP_USER 与 MAIL_FROM 必须填同一个地址
+# （QQ 要求发件人 = 登录账号，否则 550）。留空 = 任何人都注册不了，
+# 发信时报「未配置发信邮箱：SMTP_USER / SMTP_PASS 为空」。
+SMTP_USER = ""
+MAIL_FROM = ""
+# Cloudflare Turnstile 站点密钥（公开）；对应的 TURNSTILE_SECRET 用 secret 配置。留空则不启用人机验证
+TURNSTILE_SITE_KEY = ""
+
+# 以下用 `npx wrangler secret put <NAME>` 配置，不要写在这里：
+#   POLLER_TOKEN      本机轮询器调用 /api/poller/* 的凭据（随机长串）
+#   OTP_PEPPER        验证码哈希盐（随机长串）
+#   SMTP_PASS         发信邮箱的 SMTP 授权码
+#   TURNSTILE_SECRET  Turnstile 密钥（可选）
