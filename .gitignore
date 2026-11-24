@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.wrangler/
+node_modules/
+config.json
+state.json
+balance.log
+web.log
+*.mitm
+wrangler.local.toml
+.dev.vars
+worker/public/*.txt
